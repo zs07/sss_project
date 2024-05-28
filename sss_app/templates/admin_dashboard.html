@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section id="collection-1602">
+    <div class="cs-container">
+        <div id="success-message" style="display: none; padding: 10px; background-color: #4caf50; color: #fff; border-radius: 5px; text-align: center;">
+            Product added successfully
+        </div>
+        <div id="delete-success-message" style="display: none; padding: 10px; background-color: #4caf50; color: #fff; border-radius: 5px; text-align: center;">
+            Product deleted successfully
+        </div>
+        <div class="cs-listing" data-category="one">
+            <div class="cs-item">
+                <form method="post" id="add-product-form" enctype="multipart/form-data" style="max-width: 400px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; border-radius: 5px; height: 350px;">
+                    {% csrf_token %}
+                    <div class="cs-field-group" style="margin-bottom: 20px;">
+                        <label for="image" class="cs-label">Product Image:</label>
+                        <input type="file" id="image" name="image" class="cs-file-input" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    </div>
+                    <div class="cs-field-group" style="margin-bottom: 20px;">
+                        <label for="name" class="cs-label">Product Name:</label>
+                        <input type="text" id="name" name="name" class="cs-input" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    </div>
+                    <div class="cs-field-group" style="margin-bottom: 20px;">
+                        <label for="category" class="cs-label">Category:</label>
+                        <select id="category" name="category" class="cs-select" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                            <option value="Clothing">Clothing</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Home Appliances">Home Appliances</option>
+                            <option value="Sports &amp; Outdoors">Sports &amp; Outdoors</option>
+                            <option value="Books &amp; Media">Books &amp; Media</option>
+                        </select>
+                    </div>
+                    <div class="cs-field-group" style="margin-bottom: 20px;">
+                        <label for="price" class="cs-label">Price:</label>
+                        <input type="text" id="price" name="price" class="cs-input" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    </div>
+                    <div class="cs-field-group" style="margin-bottom: 20px;">
+                        <label for="stock" class="cs-label">Stock:</label>
+                        <input type="text" id="stock" name="stock" class="cs-input" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    </div>
+                    <button type="submit" class="cs-button" style="padding: 10px 20px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-top: 30px;">
+                        Add Product
+                    </button>
+                </form>
+            </div>
+            {% for product in products %}
+            <div class="cs-item">
+                <a href="#" class="cs-link">
+                    <div class="cs-picture-group">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}static/zcommerce.png{% endif %}" alt="Product Image" class="cs-image" style="max-width: 100%; max-height: 100%; display: block; margin: 0 auto;">
+                    </div>
+                    <div class="cs-details">
+                        <p class="cs-category">{{ product.category }}</p>
+                        <h2 class="cs-name">{{ product.name }}</h2>
+                        <p class="cs-price">Price: ${{ product.price }}</p>
+                        <p class="cs-stock">Stock: {{ product.stock }}</p>
+                        <a href="{% url 'edit_product' product.id %}">Edit</a>
+                        <form action="{% url 'delete_product' product.id %}" method="post" style="display: inline;" class="delete-product-form">
+                            {% csrf_token %}
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#add-product-form').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                url: '{% url "create_product" %}',
+                method: 'POST',
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    $('#success-message').fadeIn().delay(3000).fadeOut();
+                    form[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error in AJAX request:');
+                    console.log('Status: ' + status);
+                    console.log('Error: ' + error);
+                }
+            });
+        });
+        $('.delete-product-form').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: form.serialize(),
+                success: function(data) {
+                    $('#delete-success-message').fadeIn().delay(3000).fadeOut();
+                    form.closest('.cs-item').remove();
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error in AJAX request:');
+                    console.log('Status: ' + status);
+                    console.log('Error: ' + error);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

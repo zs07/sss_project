@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Shopping Site</title>
+    {% load static %}
+    <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <section id="collection-1602">
+        <div class="cs-container">
+            <div class="cs-content">
+                <img src="{% static 'zcommerce.png' %}" alt="Z-Commerce Logo" style="max-width: 100%; height: auto; width: 120px;">
+                <div class="cs-button-group">
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                            <a href="{% url 'index' %}" class="cs-button">Products</a>
+                            <a href="{% url 'admin_all_orders' %}" class="cs-button">Orders</a>
+                        {% else %}
+                            <a href="{% url 'index' %}" class="cs-button">Store</a>
+                            <a href="{% url 'my_orders' %}" class="cs-button" data-filter="two">My Orders</a>
+                            <a href="{% url 'cart' %}" class="cs-button" data-filter="three">
+                                🛒
+                                <span class="cart-icon" id="cart-icon">{{ cart_item_count }}</span>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'logout' %}" class="cs-button">Log Out</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="cs-button">Log In</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        {% block content %}
+            <!-- This block will be overridden by child templates -->
+        {% endblock %}
+    </main>
+    <script src="{% static 'script.js' %}"></script>
+    <script>
+        function updateCartIcon() {
+            const cartIcon = document.getElementById('cart-icon');
+            if (cartIcon) {
+                var totalQuantity = 0;
+                $('.cart-item .quantity').each(function() {
+                    totalQuantity += parseInt($(this).text());
+                });
+                cartIcon.textContent = totalQuantity > 0 ? totalQuantity : '';
+            }
+        }
+        $(document).ready(function() {
+            updateCartIcon();
+        });
+        document.addEventListener('cart-updated', updateCartIcon);
+    </script>
+</body>
+</html>

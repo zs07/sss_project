@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section id="collection-1602">
+  <div class="cs-container">
+
+    <!-- Category Filter -->
+    <div class="category-filter" style="margin-bottom: 20px;">
+      <form method="get" action="{% url 'index' %}">
+        {% csrf_token %}
+        <label for="category" style="font-weight: bold; margin-right: 10px;">Filter by Category:</label>
+        <select id="category" name="category" onchange="this.form.submit()" style="padding: 5px; border-radius: 5px;">
+          <option value="" {% if not selected_category %}selected{% endif %}>All</option>
+          {% for category in categories %}
+          <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <div class="cs-listing" data-category="one">
+      {% for product in products %}
+      <div class="cs-item">
+        <a href="" class="cs-link">
+          <div class="cs-picture-group">
+            <picture class="cs-picture">
+              <source media="(max-width: 600px)" srcset="{{ product.image.url }}">
+              <source media="(min-width: 601px)" srcset="{{ product.image.url }}">
+              <img loading="lazy" decoding="async" src="{{ product.image.url }}" alt="gallery" width="305" height="400">
+            </picture>
+            {% if product.discount_percentage %}
+            <span class="cs-offer">-{{ product.discount_percentage }}%</span>
+            {% endif %}
+          </div>
+          <div class="cs-details">
+            <span class="cs-category">{{ product.category }}</span>
+            <h3 class="cs-name">{{ product.name }}</h3>
+            <div class="cs-actions">
+              <div class="cs-flex">
+                <span class="cs-price">${{ product.price }}</span>
+                {% if product.was_price %}
+                <span class="cs-was-price">${{ product.was_price }}</span>
+                {% endif %}
+              </div>
+              <button data-product="{{ product.id }}" class="add-to-cart" style="background-color: #4CAF50; color: #fff; padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">
+                <span>Add to Cart</span>
+                <img src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Icons/ecomm-bag-icon.svg" alt="buy" height="24" width="24" loading="lazy" decoding="async" style="vertical-align: middle; margin-left: 10px; filter: brightness(0) invert(1);">
+              </button>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const addToCartButtons = document.querySelectorAll('.add-to-cart');
+  const cartIcon = document.querySelector('.cart-icon');
+
+  addToCartButtons.forEach(button => {
+    button.addEventListener('click', async function(event) {
+      event.preventDefault();
+      const productId = this.getAttribute('data-product');
+      await addToCart(productId);
+    });
+  });
+
+  async function addToCart(productId) {
+    try {
+      const response = await fetch(`/add_to_cart/${productId}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ product_id: productId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.message === 'Product added to cart successfully') {
+          const message = document.createElement('div');
+          message.textContent = data.message;
+          message.style.cssText = 'background-color: #4CAF50; color: #fff; padding: 10px; border-radius: 5px; position: fixed; top: 10px; right: 10px; z-index: 9999;';
+          document.body.appendChild(message);
+          setTimeout(() => {
+            message.remove();
+          }, 3000);
+
+          if (cartIcon) {
+            cartIcon.textContent = data.cart_item_count;
+          }
+        } else {
+          alert(data.message);
+        }
+      } else {
+        alert('Error adding product to cart');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+</script>
+{% endblock %}

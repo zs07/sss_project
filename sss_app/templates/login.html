@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div id="acc" style="margin-top: 20px;">
+    <h2 style="text-align: center;">Sign in here!</h2>
+    <hr style="margin-bottom: 20px;">
+    {% if message %}
+    <h5 style="text-align: center; color: #c82e2c;">{{ message }}</h5>
+    {% endif %}
+    <form id="login" method="post" style="text-align: center;">
+        {% csrf_token %}
+        <div style="margin-bottom: 10px;">
+            <label for="id_username">Username:</label>
+            <input type="text" name="username" id="id_username" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="id_password">Password:</label>
+            <input type="password" name="password" id="id_password" required>
+        </div>
+        <button type="submit" class="nav-link" style="background-color: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;">Login</button>
+    </form>
+    <div class="buttons" style="text-align: center; margin-top: 20px;">
+        Don't have an account? <a href="{% url 'signup' %}" style="color: #c82e2c; text-decoration: underline;">Sign up</a>
+    </div>
+</div>
+{% endblock %}
