@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-pod0(0$k)9))!kn5yx5k9kf#edk0jw(b0a#sxiqis02#wzch_s
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ["https://web-nwqcv3el3a-uc.a.run.app"]
+CSRF_TRUSTED_ORIGINS = ["https://zcommerce-l5wktajaca-uc.a.run.app/"]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
